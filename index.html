@@ -1,19 +1,117 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Agent Login</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Biometric Scanner Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #000000, #0f0f0f);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      background: #00ff99;
+      color: black;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    #scannerVideo {
+      width: 300px;
+      height: 200px;
+      border: 2px solid #00ff99;
+      margin: 10px 0;
+    }
+    .hidden {
+      display: none;
+    }
+    .fadeIn {
+      animation: fadeIn 1s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Agent Access</h1>
-        <form id="login-form">
-            <input type="text" id="name" placeholder="Enter Name" required><br>
-            <input type="text" id="idNumber" placeholder="Enter ID Number" required><br>
-            <button type="submit">Login</button>
-        </form>
-    </div>
-    <script src="script.js"></script>
-</body>
+  <h1>Biometric Scanner Pro</h1>
+  <input type="text" id="userName" placeholder="Enter Name" />
+  <input type="text" id="userId" placeholder="Enter ID Number" />
+  <video id="scannerVideo" class="hidden" autoplay playsinline></video>
+  <button onclick="startEyeScan()">Scan Eye</button>
+  <button onclick="startFingerprintScan()">Scan Fingerprint</button>
+  <audio id="beep" src="https://www.soundjay.com/button/sounds/beep-07.mp3"></audio>
+  <p id="status"></p>  <script>
+    let eyeScanned = false;
+    let fingerprintScanned = false;
+
+    function saveUserData() {
+      const name = document.getElementById('userName').value;
+      const id = document.getElementById('userId').value;
+      if (name && id) {
+        localStorage.setItem('biometricUser', JSON.stringify({ name, id }));
+        return true;
+      }
+      alert('Please enter both Name and ID');
+      return false;
+    }
+
+    function startEyeScan() {
+      if (!saveUserData()) return;
+      const video = document.getElementById('scannerVideo');
+      const beep = document.getElementById('beep');
+      video.classList.remove('hidden');
+      video.classList.add('fadeIn');
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          video.srcObject = stream;
+          setTimeout(() => {
+            stream.getTracks().forEach(track => track.stop());
+            video.classList.add('hidden');
+            document.getElementById('status').innerText = '✅ Eye Scan Complete';
+            beep.play();
+            eyeScanned = true;
+            checkCompletion();
+          }, 4000);
+        })
+        .catch(err => alert('Camera access denied: ' + err));
+    }
+
+    function startFingerprintScan() {
+      if (!saveUserData()) return;
+      const beep = document.getElementById('beep');
+      document.getElementById('status').innerText = '🔒 Scanning Fingerprint...';
+      setTimeout(() => {
+        fingerprintScanned = true;
+        document.getElementById('status').innerText = '✅ Fingerprint Scan Complete';
+        beep.play();
+        checkCompletion();
+      }, 3000);
+    }
+
+    function checkCompletion() {
+      if (eyeScanned && fingerprintScanned) {
+        setTimeout(() => {
+          window.location.href = 'completed.html';
+        }, 2000);
+      }
+    }
+  </script></body>
 </html>
