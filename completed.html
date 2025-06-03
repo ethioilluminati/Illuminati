@@ -1,153 +1,73 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Biometric Scanner Pro</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Touch ID Premium</title>
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, sans-serif;
       background-color: #000;
-      color: white;
+      color: #fff;
+      text-align: center;
+    }
+    h1 {
+      color: gold;
+      font-size: 2em;
+    }
+    video, img {
+      border: 3px solid red;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: transparent;
+      border: 2px solid red;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .fingerprint-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .scanner-container {
-      text-align: center;
-      padding: 20px;
-    }
-    .scanner-container input {
-      margin: 10px;
-      padding: 10px;
-      width: 250px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: none;
-    }
-    .scanner-btn {
-      background-color: #00ff00;
-      color: black;
-      border: none;
-      padding: 12px 20px;
-      margin: 10px;
-      font-size: 18px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .scanner-btn:hover {
-      background-color: #00cc00;
-    }
-    .fingerprint, .eye-scan {
-      margin-top: 20px;
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background-size: cover;
-      background-repeat: no-repeat;
-      margin-left: auto;
-      margin-right: auto;
+      margin-top: 30px;
     }
     .fingerprint {
-      background-image: url('https://media.giphy.com/media/3orieWf7Kf4GsEptI0/giphy.gif');
-      animation: pulse 2s infinite;
+      width: 150px;
+      height: 150px;
+      background: url('https://i.ibb.co/gFvzqJ9/fingerprint.gif') no-repeat center;
+      background-size: contain;
+      margin: 15px 0;
     }
-    video.eye-camera {
-      width: 120px;
-      height: 90px;
-      border-radius: 10px;
-      object-fit: cover;
-      margin-top: 10px;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.7; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .hidden {
-      display: none;
+    .instruction {
+      color: #ccc;
     }
   </style>
 </head>
 <body>
-  <div class="scanner-container">
-    <h1>Biometric Scanner Pro</h1>
-    <input type="text" id="userName" placeholder="Enter Your Name" />
-    <input type="text" id="userId" placeholder="Enter Your ID Number" /><video id="eyeCamera" autoplay playsinline class="eye-camera"></video>
-<button class="scanner-btn" onclick="scanEye()">Scan Eye</button>
-
-<div class="fingerprint"></div>
-<button class="scanner-btn" onclick="scanFingerprint()">Scan Fingerprint</button>
-
-<p id="statusText"></p>
-
-  </div><audio id="scanSound" src="https://www.soundjay.com/button/beep-07.wav"></audio> <audio id="completeSound" src="https://www.soundjay.com/button/beep-10.wav"></audio>
+  <h1>Eye Sccaner<br><span style="font-family: 'Nyala', sans-serif; font-size: 1.5em;">እይታን ወደ ካሜራው ያሳልፉ</span></h1>
+  <video id="camera" width="280" height="200" autoplay></video><br>
+  <button onclick="startScan()">Start Scan</button>  <div class="fingerprint-container">
+    <div class="fingerprint"></div>
+    <p class="instruction">Click and hold to scan your finger<br><span style="font-family: 'Nyala', sans-serif;">ጫን በመያዝ አሽከርካሪ ቅርፅ</span></p>
+  </div><audio id="beep" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
 
   <script>
-    let eyeScanned = false;
-    let fingerprintScanned = false;
+    const video = document.getElementById('camera');
+    const beep = document.getElementById('beep');
 
-    function playSound(id) {
-      const sound = document.getElementById(id);
-      if (sound) sound.play();
-    }
-
-    // Enable front camera for eye scan
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-      .then((stream) => {
-        document.getElementById("eyeCamera").srcObject = stream;
-      })
-      .catch((error) => {
-        console.error("Camera error:", error);
-        document.getElementById("statusText").innerText = "Camera access denied or not supported.";
-      });
-
-    function scanEye() {
-      const name = document.getElementById('userName').value;
-      const id = document.getElementById('userId').value;
-      if (!name || !id) {
-        alert('Please enter your name and ID first.');
-        return;
-      }
-      localStorage.setItem('userName', name);
-      localStorage.setItem('userId', id);
-      playSound('scanSound');
-      document.getElementById('statusText').innerText = 'Scanning Eye...';
+    async function startScan() {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      video.srcObject = stream;
+      beep.play();
+      localStorage.setItem('eyeScan', 'completed');
       setTimeout(() => {
-        eyeScanned = true;
-        document.getElementById('statusText').innerText = 'Eye Scan Complete ✔';
-        checkCompletion();
+        window.location.href = 'completed.html';
       }, 3000);
-    }
-
-    function scanFingerprint() {
-      const name = localStorage.getItem('userName');
-      const id = localStorage.getItem('userId');
-      if (!name || !id) {
-        alert('Please enter your name and ID first.');
-        return;
-      }
-      playSound('scanSound');
-      document.getElementById('statusText').innerText = 'Scanning Fingerprint...';
-      setTimeout(() => {
-        fingerprintScanned = true;
-        document.getElementById('statusText').innerText = 'Fingerprint Scan Complete ✔';
-        checkCompletion();
-      }, 3000);
-    }
-
-    function checkCompletion() {
-      if (eyeScanned && fingerprintScanned) {
-        playSound('completeSound');
-        document.getElementById('statusText').innerText = 'Biometric Authentication Complete ✅';
-        setTimeout(() => {
-          window.location.href = 'completed.html';
-        }, 2000);
-      }
     }
   </script></body>
 </html>
